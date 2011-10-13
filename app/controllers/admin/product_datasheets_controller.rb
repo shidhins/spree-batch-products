@@ -10,7 +10,7 @@ class Admin::ProductDatasheetsController < Admin::BaseController
   
   def show
     @product_datasheet = ProductDatasheet.find(params[:id])
-    send_file @product_datasheet.xls
+    send_file @product_datasheet.xls.to_s
   end
   
   def upload
