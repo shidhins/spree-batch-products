@@ -1,5 +1,6 @@
 class ProductDatasheet < ActiveRecord::Base
   require 'spreadsheet'
+  belongs_to :user
   
   attr_accessor :queries_failed, :records_failed, :records_matched, :records_updated
   

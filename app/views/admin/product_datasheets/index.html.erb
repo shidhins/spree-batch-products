@@ -24,6 +24,7 @@
       <th><%= t("successful_updates") %></th>
       <th><%= t("file_size") %></th>
       <th><%= t("date_processed") %></th>
+      <th><%= User.human_name %></th>
     <th data-hook="admin_product_datasheets_index_header_actions"></th>
   </tr>
 <% @product_datasheets.each do |datasheet| %>
@@ -40,6 +41,7 @@
       <% else %>
         <td>Pending</td>
       <% end %>
+      <td><%= datasheet.user ? link_to(datasheet.user.email, admin_user_path(datasheet.user)) : 'undefined' %></td>
     <td class="actions" data-hook="admin_product_datasheets_index_row_actions">
         <%= link_to_delete datasheet, {:url => admin_product_datasheet_path(datasheet)} unless datasheet.deleted? or datasheet.processed?  %>
     </td>
