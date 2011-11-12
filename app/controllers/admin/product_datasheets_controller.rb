@@ -41,8 +41,8 @@ class Admin::ProductDatasheetsController < Admin::BaseController
   def create
     @product_datasheet = ProductDatasheet.new(params[:product_datasheet])
     @product_datasheet.user = current_user
-    @product_datasheet.save
-    if @product_datasheet.xls.original_filename.end_with?(".xls") and @product_datasheet.save
+    
+    if @product_datasheet.save && @product_datasheet.xls.original_filename.end_with?(".xls")
       if defined? Delayed::Job
         Delayed::Job.enqueue(@product_datasheet)
       else
