@@ -30,7 +30,7 @@
 <% @product_datasheets.each do |datasheet| %>
   <tr <%= 'style="color:red;"' if !datasheet.processed? %> id="<%= dom_id datasheet %>" data-hook="admin_product_datasheets_index_rows">
     <%- locals = {:datasheet => datasheet} %>
-      <td><%= link_to datasheet.xls_file_name, admin_product_datasheet_path(datasheet.id) %></td>
+      <td><%= link_to datasheet.xls_file_name, datasheet.xls.url %></td>
       <td><%= datasheet.failed_queries -%></td>
       <td><%= datasheet.matched_records -%></td>
       <td><%= datasheet.failed_records -%></td>

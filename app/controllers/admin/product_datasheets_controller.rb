@@ -8,11 +8,6 @@ class Admin::ProductDatasheetsController < Admin::BaseController
     render :layout => false
   end
   
-  def show
-    @product_datasheet = ProductDatasheet.find(params[:id])
-    send_file @product_datasheet.xls.to_s
-  end
-  
   def upload
   end
   
