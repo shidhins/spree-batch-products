@@ -108,14 +108,11 @@ class ProductDatasheet < ActiveRecord::Base
   def update_products(key, value, attr_hash)
     products_to_update = Product.where(key => value).all
     @records_matched = @records_matched + products_to_update.size
-    products_to_update.each do |product| 
-      product.attributes = attr_hash
-      if product.changed?
-        if product.save
-          @records_updated = @records_updated + 1
-        else
-          @records_failed = @records_failed + 1
-        end
+    products_to_update.each do |product|
+      if product.update_attributes attr_hash 
+        @records_updated = @records_updated + 1
+      else
+        @records_failed = @records_failed + 1
       end
     end
     @queries_failed = @queries_failed + 1 if products_to_update.size == 0
@@ -125,7 +122,7 @@ class ProductDatasheet < ActiveRecord::Base
     variants_to_update = Variant.where(key => value).all
     @records_matched = @records_matched + variants_to_update.size
     variants_to_update.each do |variant|
-      if product.update_attributes attr_hash 
+      if variant.update_attributes attr_hash 
         @records_updated = @records_updated + 1
       else
         @records_failed = @records_failed + 1
