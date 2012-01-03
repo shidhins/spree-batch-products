@@ -114,11 +114,12 @@ class ProductDatasheet < ActiveRecord::Base
     variants_to_update = Variant.where(key => value).all
     @records_matched = @records_matched + variants_to_update.size
     variants_to_update.each { |variant| 
-                                        if variant.update_attributes attr_hash
-                                          @records_updated = @records_updated + 1
-                                        else
-                                          @records_failed = @records_failed + 1
-                                        end }
+      if variant.update_attributes attr_hash
+        @records_updated = @records_updated + 1
+      else
+        @records_failed = @records_failed + 1
+      end
+    }
     @queries_failed = @queries_failed + 1 if variants_to_update.size == 0
   end
   
