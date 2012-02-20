@@ -8,11 +8,6 @@ class Admin::ProductDatasheetsController < Admin::BaseController
     render :layout => false
   end
   
-  def show
-    @product_datasheet = ProductDatasheet.find(params[:id])
-    send_file @product_datasheet.xls.to_s
-  end
-  
   def upload
   end
   
@@ -39,8 +34,10 @@ class Admin::ProductDatasheetsController < Admin::BaseController
   end
   
   def create
-    @product_datasheet = ProductDatasheet.create(params[:product_datasheet])
-    if @product_datasheet.xls.original_filename.end_with?(".xls") and @product_datasheet.save
+    @product_datasheet = ProductDatasheet.new(params[:product_datasheet])
+    @product_datasheet.user = current_user
+    
+    if @product_datasheet.save && @product_datasheet.xls.original_filename.end_with?(".xls")
       if defined? Delayed::Job
         Delayed::Job.enqueue(@product_datasheet)
       else
