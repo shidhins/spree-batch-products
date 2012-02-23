@@ -1,10 +1,10 @@
-class Admin::ProductDatasheetsController < Admin::BaseController
+class Spree::Admin::ProductDatasheetsController < Admin::BaseController
   def index
-    @product_datasheets = ProductDatasheet.not_deleted
+    @product_datasheets = Spree::ProductDatasheet.not_deleted
   end
   
   def new
-    @product_datasheet = ProductDatasheet.new
+    @product_datasheet = Spree::ProductDatasheet.new
     render :layout => false
   end
   
@@ -15,7 +15,7 @@ class Admin::ProductDatasheetsController < Admin::BaseController
   end
   
   def destroy
-    @product_datasheet = ProductDatasheet.find(params[:id])
+    @product_datasheet = Spree::ProductDatasheet.find(params[:id])
     @product_datasheet.deleted_at = Time.now
     if @product_datasheet.save
       flash.notice = I18n.t("notice_messages.product_datasheet_deleted")
@@ -34,7 +34,7 @@ class Admin::ProductDatasheetsController < Admin::BaseController
   end
   
   def create
-    @product_datasheet = ProductDatasheet.new(params[:product_datasheet])
+    @product_datasheet = Spree::ProductDatasheet.new(params[:product_datasheet])
     @product_datasheet.user = current_user
     
     if @product_datasheet.save && @product_datasheet.xls.original_filename.end_with?(".xls")
@@ -46,7 +46,7 @@ class Admin::ProductDatasheetsController < Admin::BaseController
       flash.notice = I18n.t("notice_messages.product_datasheet_saved")
       redirect_to admin_product_datasheets_path
     else
-      @product_datasheets = ProductDatasheet.not_deleted
+      @product_datasheets = Spree::ProductDatasheet.not_deleted
       render :template => 'admin/product_datasheets/index', :action => :new
     end
   end

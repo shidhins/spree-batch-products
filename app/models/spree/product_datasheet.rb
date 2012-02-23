@@ -1,4 +1,4 @@
-class ProductDatasheet < ActiveRecord::Base
+class Spree::ProductDatasheet < ActiveRecord::Base
   require 'spreadsheet'
   belongs_to :user
   
@@ -42,7 +42,7 @@ class ProductDatasheet < ActiveRecord::Base
     headers = []
     
     header_row.each do |key|
-      if Product.column_names.include?(key) or Variant.column_names.include?(key)
+      if Spree::Product.column_names.include?(key) or Spree::Variant.column_names.include?(key)
         headers << key
       else
         headers << nil
@@ -76,9 +76,9 @@ class ProductDatasheet < ActiveRecord::Base
           create_variant(attr_hash)
         elsif headers[0] == 'id' and row[0].nil?
           create_product(attr_hash)
-        elsif Product.column_names.include?(headers[0])
+        elsif Spree::Product.column_names.include?(headers[0])
           update_products(headers[0], row[0], attr_hash)
-        elsif Variant.column_names.include?(headers[0])
+        elsif Spree::Variant.column_names.include?(headers[0])
           update_variants(headers[0], row[0], attr_hash)
         else
           @queries_failed = @queries_failed + 1
@@ -88,16 +88,16 @@ class ProductDatasheet < ActiveRecord::Base
       self.update_attribute(:processed_at, Time.now)
     end
     Spree::Config.set(:solr_auto_commit => true)
-    Product.solr_optimize
+    Spree::Product.solr_optimize
   end
   
   def create_product(attr_hash)
-    new_product = Product.new(attr_hash)
+    new_product = Spree::Product.new(attr_hash)
     @queries_failed = @queries_failed + 1 if not new_product.save
   end
   
   def create_variant(attr_hash)
-    new_variant = Variant.new(attr_hash)
+    new_variant = Spree::Variant.new(attr_hash)
     begin
       new_variant.save
     rescue
@@ -106,7 +106,7 @@ class ProductDatasheet < ActiveRecord::Base
   end
   
   def update_products(key, value, attr_hash)
-    products_to_update = Product.where(key => value).all
+    products_to_update = Spree::Product.where(key => value).all
     @records_matched = @records_matched + products_to_update.size
     products_to_update.each do |product| 
       product.attributes = attr_hash
@@ -122,7 +122,7 @@ class ProductDatasheet < ActiveRecord::Base
   end
   
   def update_variants(key, value, attr_hash)
-    variants_to_update = Variant.where(key => value).all
+    variants_to_update = Spree::Variant.where(key => value).all
     @records_matched = @records_matched + variants_to_update.size
     variants_to_update.each { |variant| 
       if variant.update_attributes attr_hash
