@@ -14,8 +14,8 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   validates_attachment_presence :xls
   validates_attachment_content_type :xls, :content_type => ['application/vnd.ms-excel','text/plain']
   
-  scope :not_deleted, where("product_datasheets.deleted_at is NULL")
-  scope :deleted, where("product_datasheets.deleted_at is NOT NULL")
+  scope :not_deleted, where("spree_product_datasheets.deleted_at is NULL")
+  scope :deleted, where("spree_product_datasheets.deleted_at is NOT NULL")
   
   def path
     "#{Rails.root}/uploads/product_datasheets/#{self.id}/#{self.xls_file_name}"
@@ -65,13 +65,15 @@ class Spree::ProductDatasheet < ActiveRecord::Base
     # Updating Variants:
     #   1) The search key must be present as a column name on the Variants table.
     ####################
-    Spree::Config.set(:solr_auto_commit => false)
+    
     ActiveRecord::Base.transaction do 
       worksheet.each(1) do |row|
         attr_hash = {}
+        
         for i in columns[0]..columns[1]
           attr_hash[headers[i]] = row[i].to_s if row[i] and headers[i] # if there is a value and a key; .to_s is important for ARel
         end
+        
         if headers[0] == 'id' and row[0].nil? and headers.include? 'product_id'
           create_variant(attr_hash)
         elsif headers[0] == 'id' and row[0].nil?
@@ -81,19 +83,17 @@ class Spree::ProductDatasheet < ActiveRecord::Base
         elsif Spree::Variant.column_names.include?(headers[0])
           update_variants(headers[0], row[0], attr_hash)
         else
-          @queries_failed = @queries_failed + 1
+          @queries_failed += 1
         end
         sleep 0
       end
       self.update_attribute(:processed_at, Time.now)
     end
-    Spree::Config.set(:solr_auto_commit => true)
-    Spree::Product.solr_optimize
   end
   
   def create_product(attr_hash)
     new_product = Spree::Product.new(attr_hash)
-    @queries_failed = @queries_failed + 1 if not new_product.save
+    @queries_failed += 1 unless new_product.save
   end
   
   def create_variant(attr_hash)
@@ -101,37 +101,39 @@ class Spree::ProductDatasheet < ActiveRecord::Base
     begin
       new_variant.save
     rescue
-      @queries_failed = @queries_failed + 1
+      @queries_failed += 1
     end
   end
   
   def update_products(key, value, attr_hash)
     products_to_update = Spree::Product.where(key => value).all
-    @records_matched = @records_matched + products_to_update.size
+    @records_matched += products_to_update.size
+    
     products_to_update.each do |product| 
-      product.attributes = attr_hash
-      if product.changed?
-        if product.save
-          @records_updated = @records_updated + 1
-        else
-          @records_failed = @records_failed + 1
-        end
+      if product.update_attributes attr_hash
+        @records_updated +=1
+      else
+        @records_failed += 1
       end
     end
-    @queries_failed = @queries_failed + 1 if products_to_update.size == 0
+    
+    @queries_failed += 1 if products_to_update.size == 0
   end
   
   def update_variants(key, value, attr_hash)
     variants_to_update = Spree::Variant.where(key => value).all
     @records_matched = @records_matched + variants_to_update.size
-    variants_to_update.each { |variant| 
+    
+    variants_to_update.each do |variant|
+    
       if variant.update_attributes attr_hash
-        @records_updated = @records_updated + 1
+        @records_updated += 1
       else
-        @records_failed = @records_failed + 1
+        @records_failed += 1
       end
-    }
-    @queries_failed = @queries_failed + 1 if variants_to_update.size == 0
+    end
+    
+    @queries_failed += 1 if variants_to_update.size == 0
   end
   
   def update_statistics
@@ -149,10 +151,10 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   end
   
   def processed?
-    !self.processed_at.nil?
+    processed_at.present?
   end
   
   def deleted?
-    !self.deleted_at.nil?
+    deleted_at.present?
   end
 end

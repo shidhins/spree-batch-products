@@ -1,4 +1,4 @@
-class Spree::Admin::ProductDatasheetsController < Admin::BaseController
+class Spree::Admin::ProductDatasheetsController < Spree::Admin::BaseController
   def index
     @product_datasheets = Spree::ProductDatasheet.not_deleted
   end
@@ -47,7 +47,7 @@ class Spree::Admin::ProductDatasheetsController < Admin::BaseController
       redirect_to admin_product_datasheets_path
     else
       @product_datasheets = Spree::ProductDatasheet.not_deleted
-      render :template => 'admin/product_datasheets/index', :action => :new
+      render :template => 'spree/admin/product_datasheets/index', :action => :new
     end
   end
 end

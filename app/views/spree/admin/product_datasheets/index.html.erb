@@ -1,6 +1,4 @@
-<%= render :partial => 'admin/shared/product_sub_menu' %>
-
-<%= render "shared/error_messages", :target => @product_datasheet %>
+<%= render :partial => 'spree/admin/shared/product_sub_menu' %>
 
 <div class='toolbar'>
   <ul class='actions'>
@@ -24,7 +22,7 @@
       <th><%= t("successful_updates") %></th>
       <th><%= t("file_size") %></th>
       <th><%= t("date_processed") %></th>
-      <th><%= User.human_name %></th>
+      <th><%= t('user') %></th>
     <th data-hook="admin_product_datasheets_index_header_actions"></th>
   </tr>
 <% @product_datasheets.each do |datasheet| %>
