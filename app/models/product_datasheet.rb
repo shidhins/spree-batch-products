@@ -93,7 +93,7 @@ class ProductDatasheet < ActiveRecord::Base
       self.update_attribute(:processed_at, Time.now)
     end
 #    Spree::Config.set(:solr_auto_commit => true)
-    Product.solr_optimize
+    Product.solr_optimize if Product.respond_to? :solr_optimize
   end
   
   def create_product(attr_hash)
