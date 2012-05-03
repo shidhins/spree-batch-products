@@ -36,7 +36,7 @@ class Spree::ProductDatasheet < ActiveRecord::Base
       return false
     end
     worksheet = workbook.worksheet(0)
-    columns = [worksheet.dimensions[2], worksheet.dimensions[3]]
+    columns = [worksheet.dimensions[2]+1, worksheet.dimensions[3]-1]
     header_row = worksheet.row(0)
     
     headers = []
@@ -89,6 +89,8 @@ class Spree::ProductDatasheet < ActiveRecord::Base
       end
       self.update_attribute(:processed_at, Time.now)
     end
+    
+    Spree::Product.solr_optimize if Spree::Product.respond_to? :solr_optimize
   end
   
   def create_product(attr_hash)
