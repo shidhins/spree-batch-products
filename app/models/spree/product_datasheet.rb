@@ -74,6 +74,8 @@ class Spree::ProductDatasheet < ActiveRecord::Base
           attr_hash[headers[i]] = row[i].to_s if row[i] and headers[i] # if there is a value and a key; .to_s is important for ARel
         end
         
+        next if attr_hash.empty?
+        
         if headers[0] == 'id' and row[0].nil? and headers.include? 'product_id'
           create_variant(attr_hash)
         elsif headers[0] == 'id' and row[0].nil?
