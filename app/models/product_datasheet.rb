@@ -36,7 +36,7 @@ class ProductDatasheet < ActiveRecord::Base
       return false
     end
     worksheet = workbook.worksheet(0)
-    columns = [worksheet.dimensions[2], worksheet.dimensions[3]]
+    columns = [worksheet.dimensions[2]+1, worksheet.dimensions[3]-1]
     header_row = worksheet.row(0)
     
     headers = []
@@ -65,13 +65,18 @@ class ProductDatasheet < ActiveRecord::Base
     # Updating Variants:
     #   1) The search key must be present as a column name on the Variants table.
     ####################
-    Spree::Config.set(:solr_auto_commit => false)
+    
+#    Spree::Config.set(:solr_auto_commit => false)
     ActiveRecord::Base.transaction do 
       worksheet.each(1) do |row|
         attr_hash = {}
+        
         for i in columns[0]..columns[1]
           attr_hash[headers[i]] = row[i].to_s if row[i] and headers[i] # if there is a value and a key; .to_s is important for ARel
         end
+        
+        next if attr_hash.empty?
+        
         if headers[0] == 'id' and row[0].nil? and headers.include? 'product_id'
           create_variant(attr_hash)
         elsif headers[0] == 'id' and row[0].nil?
@@ -87,7 +92,7 @@ class ProductDatasheet < ActiveRecord::Base
       end
       self.update_attribute(:processed_at, Time.now)
     end
-    Spree::Config.set(:solr_auto_commit => true)
+#    Spree::Config.set(:solr_auto_commit => true)
     Product.solr_optimize
   end
   
