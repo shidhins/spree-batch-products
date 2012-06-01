@@ -35,6 +35,7 @@ class ProductDatasheet < ActiveRecord::Base
       puts 'Failed to open xls attachment for processing'
       return false
     end
+    
     worksheet = workbook.worksheet(0)
     columns = [worksheet.dimensions[2]+1, worksheet.dimensions[3]-1]
     header_row = worksheet.row(0)
@@ -82,9 +83,11 @@ class ProductDatasheet < ActiveRecord::Base
         elsif headers[0] == 'id' and row[0].nil?
           create_product(attr_hash)
         elsif Product.column_names.include?(headers[0])
-          update_products(headers[0], row[0], attr_hash)
+          products = find_products headers[0], row[0]
+          update_products(products, attr_hash)
         elsif Variant.column_names.include?(headers[0])
-          update_variants(headers[0], row[0], attr_hash)
+          products = find_products_by_variant headers[0], row[0]
+          update_products(products, attr_hash)
         else
           @queries_failed = @queries_failed + 1
         end
@@ -110,30 +113,30 @@ class ProductDatasheet < ActiveRecord::Base
     end
   end
   
-  def update_products(key, value, attr_hash)
-    products_to_update = Product.where(key => value).all
-    @records_matched = @records_matched + products_to_update.size
-    products_to_update.each do |product|
-      if product.update_attributes attr_hash 
-        @records_updated = @records_updated + 1
+  def update_products(products, attr_hash)
+    products.each do |product|
+      if product.update_attributes attr_hash
+        @records_updated +=1
       else
-        @records_failed = @records_failed + 1
+        @records_failed += 1
       end
     end
-    @queries_failed = @queries_failed + 1 if products_to_update.size == 0
   end
   
-  def update_variants(key, value, attr_hash)
-    variants_to_update = Variant.where(key => value).all
-    @records_matched = @records_matched + variants_to_update.size
-    variants_to_update.each do |variant|
-      if variant.update_attributes attr_hash 
-        @records_updated = @records_updated + 1
-      else
-        @records_failed = @records_failed + 1
-      end
-    end
-    @queries_failed = @queries_failed + 1 if variants_to_update.size == 0
+  def find_products_by_variant key, value
+    products = Spree::Variant.includes(:product).where(key => value).all.map(&:product)
+    @records_matched += products.size
+    @queries_failed += 1 if products.size == 0
+    
+    products
+  end
+  
+  def find_products key, value
+    products = Spree::Product.where(key => value).all
+    @records_matched += products.size
+    @queries_failed += 1 if products.size == 0
+    
+    products
   end
   
   def update_statistics
