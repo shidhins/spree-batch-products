@@ -124,7 +124,7 @@ class ProductDatasheet < ActiveRecord::Base
   end
   
   def find_products_by_variant key, value
-    products = Spree::Variant.includes(:product).where(key => value).all.map(&:product)
+    products = Variant.includes(:product).where(key => value).all.map(&:product)
     @records_matched += products.size
     @queries_failed += 1 if products.size == 0
     
@@ -132,7 +132,7 @@ class ProductDatasheet < ActiveRecord::Base
   end
   
   def find_products key, value
-    products = Spree::Product.where(key => value).all
+    products = Product.where(key => value).all
     @records_matched += products.size
     @queries_failed += 1 if products.size == 0
     
