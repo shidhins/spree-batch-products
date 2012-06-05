@@ -79,9 +79,11 @@ class Spree::ProductDatasheet < ActiveRecord::Base
         elsif headers[0] == 'id' and row[0].nil?
           create_product(attr_hash)
         elsif Spree::Product.column_names.include?(headers[0])
-          update_products(headers[0], row[0], attr_hash)
+          products = find_products headers[0], row[0]
+          update_products(products, attr_hash)
         elsif Spree::Variant.column_names.include?(headers[0])
-          update_variants(headers[0], row[0], attr_hash)
+          products = find_products_by_variant headers[0], row[0]
+          update_products(products, attr_hash)
         else
           @queries_failed += 1
         end
@@ -107,35 +109,30 @@ class Spree::ProductDatasheet < ActiveRecord::Base
     end
   end
   
-  def update_products(key, value, attr_hash)
-    products_to_update = Spree::Product.where(key => value).all
-    @records_matched += products_to_update.size
-    
-    products_to_update.each do |product| 
+  def update_products(products, attr_hash)
+    products.each do |product|
       if product.update_attributes attr_hash
         @records_updated +=1
       else
         @records_failed += 1
       end
     end
-    
-    @queries_failed += 1 if products_to_update.size == 0
   end
   
-  def update_variants(key, value, attr_hash)
-    variants_to_update = Spree::Variant.where(key => value).all
-    @records_matched = @records_matched + variants_to_update.size
+  def find_products_by_variant key, value
+    products = Spree::Variant.includes(:product).where(key => value).all.map(&:product)
+    @records_matched += products.size
+    @queries_failed += 1 if products.size == 0
     
-    variants_to_update.each do |variant|
+    products
+  end
+  
+  def find_products key, value
+    products = Spree::Product.where(key => value).all
+    @records_matched += products.size
+    @queries_failed += 1 if products.size == 0
     
-      if variant.update_attributes attr_hash
-        @records_updated += 1
-      else
-        @records_failed += 1
-      end
-    end
-    
-    @queries_failed += 1 if variants_to_update.size == 0
+    products
   end
   
   def update_statistics

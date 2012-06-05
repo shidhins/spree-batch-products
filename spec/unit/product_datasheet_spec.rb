@@ -118,7 +118,7 @@ describe Spree::ProductDatasheet do
       end
       
       it 'should add the size of the collection returned by the query to @records_matched' do
-        attr_hash = {}
+        products
         @product_datasheet.records_matched.should == 1
       end
       
@@ -152,28 +152,23 @@ describe Spree::ProductDatasheet do
       it 'should increment @failed_queries when the query returns an empty collection' do
         value = 'chunky bacon chunky bacon chunky bacon'
         attr_hash = {}
-        @product_datasheet.find_products(@key, value)
+        @product_datasheet.find_products_by_variant(@key, value)
         @product_datasheet.queries_failed.should == 1
       end
       
       it 'should add the size of the collection returned by the query to @records_matched' do
-        attr_hash = {}
+        products
         @product_datasheet.records_matched.should == 1
       end
       
       it 'should increment @records_updated when the Variant successfully updates with the attr_hash and saves' do
         attr_hash = {:price => 90210.00}
-        @product_datasheet.update_variants(products, attr_hash)
+        @product_datasheet.update_products(products, attr_hash)
         @product_datasheet.records_updated.should == 1
         @variant.reload.price.to_f.should == 90210.00
         @product.reload.price.to_f.should == 90210.00
       end
       
-      it 'should increment @records_failed when the Variant fails to save' do
-        attr_hash = {:cost_price => 'not a number'}
-        @product_datasheet.update_variants(products, attr_hash)
-        @product_datasheet.records_failed.should == 1
-      end
     end
   end
 end
