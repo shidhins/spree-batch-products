@@ -1,6 +1,6 @@
 class Spree::Admin::ProductDatasheetsController < Spree::Admin::BaseController
   def index
-    @product_datasheets = Spree::ProductDatasheet.not_deleted
+    @product_datasheets = Spree::ProductDatasheet.not_deleted.page(params[:page] || 1).per(params[:per_page] || 30)
   end
   
   def new
@@ -26,11 +26,6 @@ class Spree::Admin::ProductDatasheetsController < Spree::Admin::BaseController
   end
   
   def clone
-  end
-  
-  def collection
-    return @collection if @collection
-    
   end
   
   def create
