@@ -31,7 +31,7 @@ class Admin::ProductDatasheetsController < Admin::BaseController
   def collection
     return @collection if @collection
     
-    @search = ProductDatasheet.not_deleted.metasearch(params[:search])
+    @search = ProductDatasheet.not_deleted.order('id DESC').metasearch(params[:search])
     @collection = @search.relation.paginate(:per_page => 30, :page => params[:page])
   end
   
