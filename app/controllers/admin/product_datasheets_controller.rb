@@ -1,6 +1,6 @@
 class Admin::ProductDatasheetsController < Admin::BaseController
   def index
-    @product_datasheets = ProductDatasheet.not_deleted
+    collection
   end
   
   def new
@@ -31,6 +31,8 @@ class Admin::ProductDatasheetsController < Admin::BaseController
   def collection
     return @collection if @collection
     
+    @search = ProductDatasheet.not_deleted.metasearch(params[:search])
+    @collection = @search.relation.paginate(:per_page => 30, :page => params[:page])
   end
   
   def create
