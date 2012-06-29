@@ -1,6 +1,6 @@
 class Admin::ProductDatasheetsController < Admin::BaseController
   def index
-    collection
+    @product_datasheets = collection
   end
   
   def new
@@ -46,10 +46,9 @@ class Admin::ProductDatasheetsController < Admin::BaseController
         @product_datasheet.perform
       end
       flash.notice = I18n.t("notice_messages.product_datasheet_saved")
-      redirect_to admin_product_datasheets_path
+      redirect_to admin_product_datasheets_path, :notice => 'Batch updates should soon be get processed.'
     else
-      @product_datasheets = ProductDatasheet.not_deleted
-      render :template => 'admin/product_datasheets/index', :action => :new
+      redirect_to admin_product_datasheets_path, :error => 'Couldnt process the product updates. Check your input.'
     end
   end
 end
