@@ -34,7 +34,7 @@ class Spree::Admin::ProductDatasheetsController < Spree::Admin::BaseController
     
     if @product_datasheet.save && @product_datasheet.xls.original_filename.end_with?(".xls")
       if defined? Delayed::Job
-        Delayed::Job.enqueue(@product_datasheet)
+        Delayed::Job.enqueue(@product_datasheet, -5)
       else
         @product_datasheet.perform
       end
