@@ -1,6 +1,10 @@
 class Spree::Admin::ProductDatasheetsController < Spree::Admin::BaseController
   def index
-    @product_datasheets = Spree::ProductDatasheet.not_deleted.page(params[:page] || 1).per(params[:per_page] || 30)
+    @product_datasheets = Spree::ProductDatasheet.
+                              not_deleted.
+                              order('id DESC').
+                              page(params[:page] || 1).
+                              per(params[:per_page] || 30)
   end
   
   def new
@@ -17,6 +21,7 @@ class Spree::Admin::ProductDatasheetsController < Spree::Admin::BaseController
   def destroy
     @product_datasheet = Spree::ProductDatasheet.find(params[:id])
     @product_datasheet.deleted_at = Time.now
+    
     if @product_datasheet.save
       flash.notice = I18n.t("notice_messages.product_datasheet_deleted")
     else

@@ -2,7 +2,7 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   require 'spreadsheet'
   belongs_to :user
   
-  attr_accessor :queries_failed, :records_failed, :records_matched, :records_updated
+  attr_accessor :queries_failed, :records_failed, :records_matched, :records_updated, :products_touched
   
   before_save :update_statistics
   
@@ -66,34 +66,60 @@ class Spree::ProductDatasheet < ActiveRecord::Base
     #   1) The search key must be present as a column name on the Variants table.
     ####################
     
-    ActiveRecord::Base.transaction do 
-      worksheet.each(1) do |row|
-        attr_hash = {}
-        
-        for i in columns[0]..columns[1]
-          attr_hash[headers[i]] = row[i].to_s if row[i] and headers[i] # if there is a value and a key; .to_s is important for ARel
+    begin
+      before_batch_loop
+      
+      ActiveRecord::Base.transaction do 
+        worksheet.each(1) do |row|
+          attr_hash = {}
+          
+          for i in columns[0]..columns[1]
+            attr_hash[headers[i]] = row[i].to_s if row[i] and headers[i] # if there is a value and a key; .to_s is important for ARel
+          end
+          
+          next if attr_hash.empty?
+          
+          if headers[0] == 'id' and row[0].nil? and headers.include? 'product_id'
+            create_variant(attr_hash)
+          elsif headers[0] == 'id' and row[0].nil?
+            create_product(attr_hash)
+          elsif Spree::Product.column_names.include?(headers[0])
+            products = find_products headers[0], row[0]
+            update_products(products, attr_hash)
+            
+            self.products_touched += products
+          elsif Spree::Variant.column_names.include?(headers[0])
+            products = find_products_by_variant headers[0], row[0]
+            update_products(products, attr_hash)
+            
+            self.products_touched += products
+          else
+            @queries_failed = @queries_failed + 1
+          end
+          sleep 0
         end
-        
-        next if attr_hash.empty?
-        
-        if headers[0] == 'id' and row[0].nil? and headers.include? 'product_id'
-          create_variant(attr_hash)
-        elsif headers[0] == 'id' and row[0].nil?
-          create_product(attr_hash)
-        elsif Spree::Product.column_names.include?(headers[0])
-          products = find_products headers[0], row[0]
-          update_products(products, attr_hash)
-        elsif Spree::Variant.column_names.include?(headers[0])
-          products = find_products_by_variant headers[0], row[0]
-          update_products(products, attr_hash)
-        else
-          @queries_failed += 1
-        end
-        sleep 0
+        self.update_attribute(:processed_at, Time.now)
       end
-      self.update_attribute(:processed_at, Time.now)
+      
+    ensure
+      after_batch_loop
+      after_processing
     end
-    
+  end
+  
+  def before_batch_loop
+    self.products_touched = []
+
+    Spree::Product.instance_methods.include?(:solr_save) and
+      Spree::Product.skip_callback(:save, :after, :solr_save)
+  end
+  
+  def after_batch_loop
+    Spree::Product.instance_methods.include?(:solr_save) and
+      Spree::Product.set_callback(:save, :after, :solr_save)
+  end
+  
+  def after_processing
     Spree::Product.solr_optimize if Spree::Product.respond_to? :solr_optimize
   end
   
