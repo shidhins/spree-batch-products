@@ -12,6 +12,18 @@ Each ProductDatasheet record has 4 integer fields that give a basic description 
 * `:failed_records =>` sum of all records that had a 'false' return when saved
 * `:failed_queries =>` number of rows that matched no Product or Variant records
 
+Warning
+=======
+
+This extension makes heavy use of Rails' mass assignment. As you may or may not know, as of 3.1+ mass-assignment friendly attributes must be whitelisted as a security precaution. The developers of this extension make no such inferences, as each deployment is different. Please decorate Spree::Product and whitelist attributes you're planning to mass-update.
+
+Exameple:
+```ruby
+Spree::Product.class_eval do
+  attr_accessible :price, :description, :meta_description, :weight
+end
+```
+
 Installation
 ============
 
