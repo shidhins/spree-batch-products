@@ -3,7 +3,7 @@ PATH
   specs:
     spree_batch_products (1.0.0)
       spreadsheet (>= 0.6.5.4)
-      spree_core (~> 1.0.3)
+      spree_core (~> 1.0)
 
 GEM
   remote: http://rubygems.org/
@@ -144,8 +144,8 @@ GEM
       activesupport (>= 3.0)
       railties (>= 3.0)
       rspec (~> 2.10.0)
-    ruby-ole (1.2.11.3)
-    spreadsheet (0.7.1)
+    ruby-ole (1.2.11.4)
+    spreadsheet (0.7.3)
       ruby-ole (>= 1.0)
     spree (1.0.4)
       spree_api (= 1.0.4)

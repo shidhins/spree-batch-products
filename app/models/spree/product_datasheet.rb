@@ -42,7 +42,9 @@ class Spree::ProductDatasheet < ActiveRecord::Base
     headers = []
     
     header_row.each do |key|
-      if Spree::Product.column_names.include?(key) or Spree::Variant.column_names.include?(key)
+      method = "#{key}="
+
+      if Spree::Product.respond_to?(method) or Spree::Variant.respond_to?(method)
         headers << key
       else
         headers << nil
