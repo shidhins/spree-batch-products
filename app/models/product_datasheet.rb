@@ -43,7 +43,9 @@ class ProductDatasheet < ActiveRecord::Base
     headers = []
     
     header_row.each do |key|
-      if Product.column_names.include?(key) or Variant.column_names.include?(key)
+      method = "#{key}="
+
+      if Product.respond_to?(method) or Variant.respond_to?(method)
         headers << key
       else
         headers << nil
