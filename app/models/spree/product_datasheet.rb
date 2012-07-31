@@ -44,7 +44,7 @@ class Spree::ProductDatasheet < ActiveRecord::Base
     header_row.each do |key|
       method = "#{key}="
 
-      if Spree::Product.respond_to?(method) or Spree::Variant.respond_to?(method)
+      if Spree::Product.new.respond_to?(method) or Spree::Variant.new.respond_to?(method)
         headers << key
       else
         headers << nil
