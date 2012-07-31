@@ -45,7 +45,7 @@ class ProductDatasheet < ActiveRecord::Base
     header_row.each do |key|
       method = "#{key}="
 
-      if Product.respond_to?(method) or Variant.respond_to?(method)
+      if Product.new.respond_to?(method) or Variant.new.respond_to?(method)
         headers << key
       else
         headers << nil
