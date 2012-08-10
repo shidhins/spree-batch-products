@@ -4,6 +4,7 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   
   attr_accessor :queries_failed, :records_failed, :records_matched, :records_updated, :touched_product_ids
   alias_method :products_touched, :touched_product_ids
+  attr_accessible :xls_file_name, :xls, :deleted_at
   
   before_save :update_statistics
   
