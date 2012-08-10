@@ -37,7 +37,7 @@ class Spree::Admin::ProductDatasheetsController < Spree::Admin::BaseController
     @product_datasheet = Spree::ProductDatasheet.new(params[:product_datasheet])
     @product_datasheet.user = current_user
     
-    if @product_datasheet.save && @product_datasheet.xls.original_filename.end_with?(".xls")
+    if @product_datasheet.save && @product_datasheet.xls.original_filename =~ /\.(xlsx?|ods)$/
       if defined? Delayed::Job
         Delayed::Job.enqueue(@product_datasheet, -5)
       else
