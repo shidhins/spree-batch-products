@@ -2,7 +2,8 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   require 'roo'
   belongs_to :user
   
-  attr_accessor :queries_failed, :records_failed, :records_matched, :records_updated, :products_touched
+  attr_accessor :queries_failed, :records_failed, :records_matched, :records_updated, :touched_product_ids
+  alias_method :products_touched, :touched_product_ids
   
   before_save :update_statistics
   
@@ -90,12 +91,12 @@ class Spree::ProductDatasheet < ActiveRecord::Base
             products = find_products headers[0], row[0]
             update_products(products, attr_hash)
             
-            self.products_touched += products
+            self.touched_product_ids += products.map(&:id)
           elsif Spree::Variant.column_names.include?(headers[0])
             products = find_products_by_variant headers[0], row[0]
             update_products(products, attr_hash)
             
-            self.products_touched += products
+            self.touched_product_ids += products.map(&:id)
           else
             @queries_failed = @queries_failed + 1
           end
@@ -111,7 +112,7 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   end
   
   def before_batch_loop
-    self.products_touched = []
+    self.touched_product_ids = []
 
     Spree::Product.instance_methods.include?(:solr_save) and
       Spree::Product.skip_callback(:save, :after, :solr_save)
