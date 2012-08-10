@@ -1,5 +1,5 @@
 class Spree::ProductDatasheet < ActiveRecord::Base
-  require 'spreadsheet'
+  require 'roo'
   belongs_to :user
   
   attr_accessor :queries_failed, :records_failed, :records_matched, :records_updated, :products_touched
@@ -30,14 +30,13 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   def perform
     workbook =
     begin
-      Spreadsheet.open self.xls.to_file
+      Excel.new self.xls.path
     rescue
       puts 'Failed to open xls attachment for processing'
       return false
     end
-    worksheet = workbook.worksheet(0)
-    columns = [worksheet.dimensions[2]+1, worksheet.dimensions[3]-1]
-    header_row = worksheet.row(0)
+    columns_range = workbook.first_column..workbook.last_column
+    header_row = workbook.row(workbook.first_row)
     
     headers = []
     
@@ -72,10 +71,12 @@ class Spree::ProductDatasheet < ActiveRecord::Base
       before_batch_loop
       
       ActiveRecord::Base.transaction do 
-        worksheet.each(1) do |row|
+        range = (workbook.first_row+1..workbook.last_row)
+        range.each do |idx|
+          row = workbook.row(idx)
           attr_hash = {}
           
-          for i in columns[0]..columns[1]
+          for i in columns_range
             attr_hash[headers[i]] = row[i].to_s if row[i] and headers[i] # if there is a value and a key; .to_s is important for ARel
           end
           

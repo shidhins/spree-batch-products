@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.requirements << 'none'
 
   s.add_dependency 'spree_core', '~> 1.0'
-  s.add_dependency('spreadsheet', '>= 0.6.5.4')
+  s.add_dependency 'roo', '~> 1.10'
 
   s.add_development_dependency 'factory_girl'
   s.add_development_dependency 'ffaker'
