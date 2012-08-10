@@ -48,7 +48,8 @@ class Admin::ProductDatasheetsController < Admin::BaseController
       flash.notice = I18n.t("notice_messages.product_datasheet_saved")
       redirect_to admin_product_datasheets_path, :notice => 'Batch updates should soon be get processed.'
     else
-      redirect_to admin_product_datasheets_path, :error => 'Couldnt process the product updates. Check your input.'
+      flash[:error] = "Failed to create the product datasheet"
+      redirect_to admin_product_datasheets_path
     end
   end
 end
