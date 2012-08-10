@@ -46,8 +46,8 @@ class Spree::Admin::ProductDatasheetsController < Spree::Admin::BaseController
       flash.notice = I18n.t("notice_messages.product_datasheet_saved")
       redirect_to admin_product_datasheets_path
     else
-      @product_datasheets = Spree::ProductDatasheet.not_deleted
-      render :template => 'spree/admin/product_datasheets/index', :action => :new
+      flash[:error] = "Failed to create the product datasheet"
+      redirect_to admin_product_datasheets_path
     end
   end
 end
