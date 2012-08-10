@@ -1,5 +1,4 @@
 class ProductDatasheet < ActiveRecord::Base
-  require 'roo'
   belongs_to :user
   
   attr_accessor :queries_failed, :records_failed, :records_matched, :records_updated, :touched_product_ids
@@ -13,7 +12,7 @@ class ProductDatasheet < ActiveRecord::Base
   has_attached_file :xls, :path => ":rails_root/uploads/product_datasheets/:id/:basename.:extension"  
   
   validates_attachment_presence :xls
-  validates_attachment_content_type :xls, :content_type => ['application/vnd.ms-excel','text/plain']
+  validates_attachment_content_type :xls, :content_type => ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.oasis.opendocument.spreadsheet', 'text/plain']
   
   scope :not_deleted, where("product_datasheets.deleted_at is NULL")
   scope :deleted, where("product_datasheets.deleted_at is NOT NULL")
@@ -31,7 +30,7 @@ class ProductDatasheet < ActiveRecord::Base
   def perform
     workbook =
     begin
-      Excel.new self.xls.path
+      SpreadsheetDocument.load(self.xls.path)
     rescue
       puts 'Failed to open xls attachment for processing'
       return false
