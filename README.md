@@ -57,6 +57,18 @@ Record Updating
 
 Updating collections of records follows similarly from the example.  Updating Product collections requires a search attribute that is present as an attribute column on the Products table in the database; the same is true for Variant collections.  Attributes with empty value cells are not included in the attributes hash to update the record.
 
+Export of existing products
+---------------------------
+
+You can use rake task in following forms:
+
+* `rake spree_batch_products:create_backup` - default fieldset
+* `rake spree_batch_products:create_backup[sku/name/price]` - custom fieldset
+* `rake spree_batch_products:create_backup sku,name,price` - custom fieldset
+
+You can also override default fieldset by overriding `Spree::Product::FIELDS_FOR_BACKUP`
+
+
 Questions?
 ----------
 
