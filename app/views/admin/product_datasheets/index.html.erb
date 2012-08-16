@@ -43,7 +43,11 @@
       <% end %>
       <td><%= datasheet.user ? link_to(datasheet.user.email, admin_user_path(datasheet.user)) : 'undefined' %></td>
     <td class="actions" data-hook="admin_product_datasheets_index_row_actions">
-        <%= link_to_delete datasheet, {:url => admin_product_datasheet_path(datasheet)} unless datasheet.deleted? or datasheet.processed?  %>
+      <% if datasheet.product_errors.any? %>
+        <%= link_to(I18n.t(:see_errors), '#', :onclick => "jAlert('<div style=\"max-height:480px; overflow-y: scroll;\"><ul><li>#{j datasheet.product_errors.join('</li><li>')}</li></ul></div>', '#{I18n.t(:list_of_errors_in, :file_name => j(datasheet.xls_file_name))}'); return false;") -%>
+      <% elsif !(datasheet.deleted? or datasheet.processed?) %>
+        <%= link_to_delete datasheet, {:url => admin_product_datasheet_path(datasheet)} %>
+      <% end %>
     </td>
   </tr>
 <% end %>  
