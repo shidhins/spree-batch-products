@@ -4,6 +4,11 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   attr_accessor :queries_failed, :records_failed, :records_matched, :records_updated, :touched_product_ids
   alias_method :products_touched, :touched_product_ids
   attr_accessible :xls_file_name, :xls, :deleted_at
+  serialize :product_errors
+  
+  after_initialize do
+    self.product_errors ||= []
+  end
   
   before_save :update_statistics
   
@@ -129,7 +134,10 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   
   def create_product(attr_hash)
     new_product = Spree::Product.new(attr_hash)
-    @queries_failed += 1 unless new_product.save
+    unless new_product.save
+      @queries_failed += 1
+      self.product_errors += new_product.errors.to_a.map{|e| "Product #{new_product.sku}: #{e.downcase}"}.uniq
+    end
   end
   
   def create_variant(attr_hash)
@@ -138,6 +146,7 @@ class Spree::ProductDatasheet < ActiveRecord::Base
       new_variant.save
     rescue
       @queries_failed += 1
+      self.product_errors += new_variant.errors.to_a.map{|e| "Variant #{new_variant.sku}: #{e.downcase}"}.uniq
     end
   end
   
@@ -147,6 +156,7 @@ class Spree::ProductDatasheet < ActiveRecord::Base
         @records_updated +=1
       else
         @records_failed += 1
+        self.product_errors += product.errors.to_a.map{|e| "Product #{product.sku}: #{e.downcase}"}.uniq
       end
     end
   end
