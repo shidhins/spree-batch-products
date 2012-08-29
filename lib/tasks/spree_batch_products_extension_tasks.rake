@@ -11,7 +11,7 @@ namespace :spree_batch_products do
     reset = cr + clear# reset lines
     
     counter = 0
-    total = Spree::Product.for_backup.count
+    total = Product.for_backup.count
     
     puts "#{total} products total are about to be processed."
     total = total/100.0
@@ -21,7 +21,7 @@ namespace :spree_batch_products do
     elsif args[:fields_for_backup].present?
       headings = args[:fields_for_backup].split('/')
     else
-      headings = Spree::Product::FIELDS_FOR_BACKUP
+      headings = Product::FIELDS_FOR_BACKUP
     end
     
     serializer = SimpleXlsx::Serializer.new("#{Rails.root}/pricing_backups.xlsx") do |doc|
@@ -29,7 +29,7 @@ namespace :spree_batch_products do
       
         sheet.add_row headings
       
-        Spree::Product.for_backup.find_in_batches(:batch_size => 100) do |products|
+        Product.for_backup.find_in_batches(:batch_size => 100) do |products|
           
           products.each do |product|
             counter +=1
