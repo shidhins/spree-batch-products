@@ -36,7 +36,7 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   def perform
     workbook =
     begin
-      SpreadsheetDocument.load(self.xls.path)
+      SpreadsheetDocument.load(self.xls.to_s)
     rescue
       puts 'Failed to open xls attachment for processing'
       return false
