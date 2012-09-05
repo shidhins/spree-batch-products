@@ -81,24 +81,28 @@ class ProductDatasheet < ActiveRecord::Base
         range.each do |idx|
           row = workbook.row(idx)
           attr_hash = {}
-          
+          lookup_value = (row[0].is_a?(Float) ? row[0].to_i : row[0]).to_s
+
           for i in columns_range
-            attr_hash[headers[i]] = row[i].to_s if row[i] and headers[i] # if there is a value and a key; .to_s is important for ARel
+            next unless value = row[i] and key = headers[i] # ignore cell if it has no value
+
+            safe_value = (value.is_a?(Float) ? value.to_i : value).to_s
+            attr_hash[key] = safe_value
           end
           
           next if attr_hash.empty?
           
-          if headers[0] == 'id' and row[0].nil? and headers.include? 'product_id'
+          if headers[0] == 'id' and lookup_value.nil? and headers.include? 'product_id'
             create_variant(attr_hash)
-          elsif headers[0] == 'id' and row[0].nil?
+          elsif headers[0] == 'id' and lookup_value.nil?
             create_product(attr_hash)
           elsif Product.column_names.include?(headers[0])
-            products = find_products headers[0], row[0]
+            products = find_products headers[0], lookup_value
             update_products(products, attr_hash)
             
             self.touched_product_ids += products.map(&:id)
           elsif Variant.column_names.include?(headers[0])
-            products = find_products_by_variant headers[0], row[0]
+            products = find_products_by_variant headers[0], lookup_value
             update_products(products, attr_hash)
             
             self.touched_product_ids += products.map(&:id)
