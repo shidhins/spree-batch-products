@@ -15,17 +15,13 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   after_find :setup_statistics
   after_initialize :setup_statistics
   
-  has_attached_file :xls, :path => ":rails_root/uploads/product_datasheets/:id/:basename.:extension"  
+  has_attached_file :xls, :url => "/uploads/product_datasheets/:id/:filename"
   
   validates_attachment_presence :xls
   validates_attachment_content_type :xls, :content_type => ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.oasis.opendocument.spreadsheet', 'text/plain']
   
   scope :not_deleted, where("spree_product_datasheets.deleted_at is NULL")
   scope :deleted, where("spree_product_datasheets.deleted_at is NOT NULL")
-  
-  def path
-    "#{Rails.root}/uploads/product_datasheets/#{self.id}/#{self.xls_file_name}"
-  end
   
   ####################
   # Main logic of extension
@@ -36,10 +32,9 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   def perform
     workbook =
     begin
-      SpreadsheetDocument.load(self.xls.to_s)
+      SpreadsheetDocument.load self.xls.path
     rescue
-      puts 'Failed to open xls attachment for processing'
-      return false
+      raise 'Failed to open xls attachment for processing'
     end
     columns_range = workbook.first_column..workbook.last_column
     header_row = workbook.row(workbook.first_row)
