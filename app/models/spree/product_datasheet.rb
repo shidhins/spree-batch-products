@@ -75,16 +75,14 @@ class Spree::ProductDatasheet < ActiveRecord::Base
 
           for i in columns_range
             next unless value = row[i] and key = headers[i] # ignore cell if it has no value
-
-            safe_value = (value.is_a?(Float) ? value.to_i : value).to_s
-            attr_hash[key] = safe_value
+            attr_hash[key] = value
           end
           
           next if attr_hash.empty?
           
-          if headers[0] == 'id' and lookup_value.nil? and headers.include? 'product_id'
+          if headers[0] == 'id' and lookup_value.empty? and headers.include? 'product_id'
             create_variant(attr_hash)
-          elsif headers[0] == 'id' and lookup_value.nil?
+          elsif headers[0] == 'id' and lookup_value.empty?
             create_product(attr_hash)
           elsif Spree::Product.column_names.include?(headers[0])
             products = find_products headers[0], lookup_value
