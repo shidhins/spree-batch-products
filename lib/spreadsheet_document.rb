@@ -4,13 +4,13 @@ class SpreadsheetDocument
     file_name = xls.url
     case file_name.split('.').last
       when 'xls'
-        Excel.new file_name
+        Roo::Excel.new file_name
       when 'xlsx'
-        Excelx.new file_name
+        Roo::Excelx.new file_name
       when 'ods'
-        Openoffice.new file_name
+        Roo::Openoffice.new file_name
       when 'csv'
-        Csv.new file_name
+        Roo::Csv.new file_name
     end
   end
 end
