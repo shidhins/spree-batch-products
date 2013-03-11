@@ -66,41 +66,39 @@ class Spree::ProductDatasheet < ActiveRecord::Base
     begin
       before_batch_loop
       
-      ActiveRecord::Base.transaction do 
-        range = (workbook.first_row+1..workbook.last_row)
-        range.each do |idx|
-          row = workbook.row(idx)
-          attr_hash = {}
-          lookup_value = (row[0].is_a?(Float) ? row[0].to_i : row[0]).to_s
+      range = (workbook.first_row+1..workbook.last_row)
+      range.each do |idx|
+        row = workbook.row(idx)
+        attr_hash = {}
+        lookup_value = (row[0].is_a?(Float) ? row[0].to_i : row[0]).to_s
 
-          for i in columns_range
-            next unless value = row[i] and key = headers[i] # ignore cell if it has no value
-            attr_hash[key] = value
-          end
-          
-          next if attr_hash.empty?
-          
-          if headers[0] == 'id' and lookup_value.empty? and headers.include? 'product_id'
-            create_variant(attr_hash)
-          elsif headers[0] == 'id' and lookup_value.empty?
-            create_product(attr_hash)
-          elsif Spree::Product.column_names.include?(headers[0])
-            products = find_products headers[0], lookup_value
-            update_products(products, attr_hash)
-            
-            self.touched_product_ids += products.map(&:id)
-          elsif Spree::Variant.column_names.include?(headers[0])
-            products = find_products_by_variant headers[0], lookup_value
-            update_products(products, attr_hash)
-            
-            self.touched_product_ids += products.map(&:id)
-          else
-            @queries_failed = @queries_failed + 1
-          end
-          sleep 0
+        for i in columns_range
+          next unless value = row[i] and key = headers[i] # ignore cell if it has no value
+          attr_hash[key] = value
         end
-        self.update_attribute(:processed_at, Time.now)
+        
+        next if attr_hash.empty?
+        
+        if headers[0] == 'id' and lookup_value.empty? and headers.include? 'product_id'
+          create_variant(attr_hash)
+        elsif headers[0] == 'id' and lookup_value.empty?
+          create_product(attr_hash)
+        elsif Spree::Product.column_names.include?(headers[0])
+          products = find_products headers[0], lookup_value
+          update_products(products, attr_hash)
+          
+          self.touched_product_ids += products.map(&:id)
+        elsif Spree::Variant.column_names.include?(headers[0])
+          products = find_products_by_variant headers[0], lookup_value
+          update_products(products, attr_hash)
+          
+          self.touched_product_ids += products.map(&:id)
+        else
+          @queries_failed = @queries_failed + 1
+        end
+        sleep 0
       end
+      self.update_attribute(:processed_at, Time.now)
       
     ensure
       after_batch_loop
