@@ -1,4 +1,6 @@
-class Spree::ProductDatasheet < ActiveRecord::Base
+module Spree
+class ProductDatasheet < ActiveRecord::Base
+  require 'csv'
   belongs_to :user
   
   attr_accessor :queries_failed, :records_failed, :records_matched, :records_updated, :touched_product_ids
@@ -15,10 +17,11 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   after_find :setup_statistics
   after_initialize :setup_statistics
   
-  has_attached_file :xls, :url => "/uploads/product_datasheets/:id/:filename"
+  has_attached_file :xls, :url => "/uploads/product_datasheets/:id/:filename", 
+                    :path => ":rails_root/public/uploads/product_datasheets/:id/:filename"
   
   validates_attachment_presence :xls
-  validates_attachment_content_type :xls, :content_type => ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.oasis.opendocument.spreadsheet', 'text/plain']
+  validates_attachment_content_type :xls, :content_type => ['text/csv', 'text/plain']
   
   scope :not_deleted, where("spree_product_datasheets.deleted_at is NULL")
   scope :deleted, where("spree_product_datasheets.deleted_at is NOT NULL")
@@ -30,22 +33,6 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   # Iterates row-by-row to populate a hash of { :attribute => :value } pairs, uses this hash to create or update records accordingly
   ####################
   def perform
-    workbook =SpreadsheetDocument.load xls
-    columns_range = workbook.first_column..workbook.last_column
-    header_row = workbook.row(workbook.first_row)
-    
-    headers = []
-    
-    header_row.each do |key|
-      method = "#{key}="
-
-      if Spree::Product.new.respond_to?(method) or Spree::Variant.new.respond_to?(method)
-        headers << key
-      else
-        headers << nil
-      end
-    end
-    
     ####################
     # Creating Variants:
     #   1) First cell of headers row must define 'id' as the search key
@@ -66,37 +53,24 @@ class Spree::ProductDatasheet < ActiveRecord::Base
     begin
       before_batch_loop
       
-      range = (workbook.first_row+1..workbook.last_row)
-      range.each do |idx|
-        row = workbook.row(idx)
-        attr_hash = {}
-        lookup_value = (row[0].is_a?(Float) ? row[0].to_i : row[0]).to_s
-
-        for i in columns_range
-          next unless value = row[i] and key = headers[i] # ignore cell if it has no value
-          attr_hash[key] = value
-        end
-        
-        next if attr_hash.empty?
-        
-        if headers[0] == 'id' and lookup_value.empty? and headers.include? 'product_id'
-          create_variant(attr_hash)
-        elsif headers[0] == 'id' and lookup_value.empty?
-          create_product(attr_hash)
-        elsif Spree::Product.column_names.include?(headers[0])
-          products = find_products headers[0], lookup_value
-          update_products(products, attr_hash)
-          
-          self.touched_product_ids += products.map(&:id)
-        elsif Spree::Variant.column_names.include?(headers[0])
-          products = find_products_by_variant headers[0], lookup_value
-          update_products(products, attr_hash)
-          
-          self.touched_product_ids += products.map(&:id)
+      idx = 0
+      CSV.foreach(xls.path) do |row|
+        if idx == 0
+          @headers = []
+          row.each do |key|
+            method = "#{key}="
+            if Product.new.respond_to?(method) or Variant.new.respond_to?(method)
+              @headers << key
+            else
+              @headers << nil
+            end
+          end
+          @primary_key = @headers[0]
         else
-          @queries_failed = @queries_failed + 1
+          handle_line(row, idx)
+          sleep 0
         end
-        sleep 0
+        idx += 1
       end
       self.update_attribute(:processed_at, Time.now)
       
@@ -105,6 +79,38 @@ class Spree::ProductDatasheet < ActiveRecord::Base
       after_processing
     end
   end
+  
+  
+  def handle_line(row, idx)
+    attr_hash = {}
+    lookup_value = (row[0].is_a?(Float) ? row[0].to_i : row[0]).to_s
+
+    row.each_with_index do |value, i|
+      next unless value and key = @headers[i] # ignore cell if it has no value
+      attr_hash[key] = value
+    end
+    
+    return if attr_hash.empty?
+    
+    if @primary_key == 'id' and lookup_value.empty? and @headers.include? 'product_id'
+      create_variant(attr_hash)
+    elsif @primary_key == 'id' and lookup_value.empty?
+      create_product(attr_hash)
+    elsif Product.column_names.include?(@primary_key)
+      products = find_products @primary_key, lookup_value
+      update_products(products, attr_hash)
+      
+      self.touched_product_ids += products.map(&:id)
+    elsif Variant.column_names.include?(@primary_key)
+      products = find_products_by_variant @primary_key, lookup_value
+      update_products(products, attr_hash)
+      
+      self.touched_product_ids += products.map(&:id)
+    else
+      @queries_failed = @queries_failed + 1
+    end
+  end
+  
   
   def before_batch_loop
     self.touched_product_ids = []
@@ -188,4 +194,5 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   def deleted?
     deleted_at.present?
   end
+end
 end
