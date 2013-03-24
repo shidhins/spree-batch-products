@@ -54,7 +54,7 @@ class ProductDatasheet < ActiveRecord::Base
       before_batch_loop
       
       idx = 0
-      CSV.foreach(xls.path) do |row|
+      csv_enumerator do |row|
         if idx == 0
           @headers = []
           row.each do |key|
@@ -80,6 +80,13 @@ class ProductDatasheet < ActiveRecord::Base
     end
   end
   
+  def csv_enumerator(&block)
+    if self.class.attachment_definitions[:xls][:storage] == :s3
+      CSV.parse(open xls.url).each(&block)
+    else
+      CSV.foreach(xls.path, {}, &block)
+    end
+  end
   
   def handle_line(row, idx)
     attr_hash = {}
