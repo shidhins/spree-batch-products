@@ -49,7 +49,6 @@ class ProductDatasheet < ActiveRecord::Base
     # Updating Variants:
     #   1) The search key must be present as a column name on the Variants table.
     ####################
-    
     begin
       before_batch_loop
       
@@ -107,12 +106,12 @@ class ProductDatasheet < ActiveRecord::Base
       products = find_products @primary_key, lookup_value
       update_products(products, attr_hash)
       
-      self.touched_product_ids += products.map(&:id)
+      self.touched_product_ids += products.map{|p| p.id}
     elsif Variant.column_names.include?(@primary_key)
       products = find_products_by_variant @primary_key, lookup_value
       update_products(products, attr_hash)
       
-      self.touched_product_ids += products.map(&:id)
+      self.touched_product_ids += products.map{|p| p.id}
     else
       @queries_failed = @queries_failed + 1
     end
@@ -122,13 +121,15 @@ class ProductDatasheet < ActiveRecord::Base
   def before_batch_loop
     self.touched_product_ids = []
 
-    Spree::Product.instance_methods.include?(:solr_save) and
-      Spree::Product.skip_callback(:save, :after, :solr_save)
+    if Spree::Product._save_callbacks.detect {|cb| cb.kind == :after && cb.filter == :perform_index_tasks}
+      Spree::Product.skip_callback(:save, :after, :perform_index_tasks)
+    end
   end
   
   def after_batch_loop
-    Spree::Product.instance_methods.include?(:solr_save) and
-      Spree::Product.set_callback(:save, :after, :solr_save)
+    if Spree::Product.searchable? && Spree::Product._save_callbacks.detect {|cb| cb.kind == :after && cb.filter == :perform_index_tasks}.nil?
+      Spree::Product.set_callback(:save, :after, :perform_index_tasks)
+    end
   end
   
   def after_processing
