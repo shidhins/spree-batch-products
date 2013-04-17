@@ -156,6 +156,7 @@ class ProductDatasheet < ActiveRecord::Base
   
   def update_products(products, attr_hash)
     products.each do |product|
+      product.instance_variable_set "@readonly", false
       if product.update_attributes attr_hash
         @records_updated +=1
       else
@@ -166,7 +167,7 @@ class ProductDatasheet < ActiveRecord::Base
   end
   
   def find_products_by_variant key, value
-    products = Product.joins(:variants_including_master).where(key => value).all
+    products = Spree::Product.joins(:variants_including_master).where(:spree_variants => {key => value}).all
     @records_matched += products.size
     @queries_failed += 1 if products.size == 0
     
