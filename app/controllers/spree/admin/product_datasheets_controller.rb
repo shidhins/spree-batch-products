@@ -1,4 +1,7 @@
 class Spree::Admin::ProductDatasheetsController < Spree::Admin::BaseController
+  respond_to :html
+  respond_to :js, :except => [:show, :index]
+  
   def index
     @product_datasheets = Spree::ProductDatasheet.
                               not_deleted.
@@ -23,11 +26,14 @@ class Spree::Admin::ProductDatasheetsController < Spree::Admin::BaseController
     @product_datasheet.deleted_at = Time.now
     
     if @product_datasheet.save
-      flash.notice = I18n.t("notice_messages.product_datasheet_deleted")
+      flash.notice = flash_message_for(@product_datasheet, :successfully_removed)
     else
       @product_datasheet.errors.add_to_base('Failed to delete the product datasheet')
     end
-    redirect_to admin_product_datasheets_path(:format => :html)
+    respond_with(@product_datasheet) do |format|
+      format.html { redirect_to admin_product_datasheets_path }
+      format.js   { render :partial => "spree/admin/shared/destroy" }
+    end
   end
   
   def clone
