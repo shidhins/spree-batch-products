@@ -2,22 +2,21 @@
 Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.name        = 'spree_batch_products'
-  s.version     = '1.0.0'
+  s.version     = '2.0.0'
   s.summary     = 'Updating collections of Variants/Products through use of an excel format spreadsheet'
   s.description = 'Add (optional) gem description here'
-  s.required_ruby_version = '>= 1.8.7'
+  s.required_ruby_version = '>= 1.9.2'
 
   s.author            = ['Thomas Farnham', 'Denis Ivanov']
   s.email             = 'minustehbare@gmail.com'
   s.homepage          = 'http://github.com/jumph4x/spree-batch-products'
-  s.rubyforge_project = 'actionmailer'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.require_path = 'lib'
   s.requirements << 'none'
 
-  s.add_dependency 'spree_core', '~> 1.0'
+  s.add_dependency 'spree_core', '~> 2.0'
   s.add_dependency 'roo', '~> 1.10'
   s.add_dependency 'simple_xlsx_writer', '~> 0.5.3'
 

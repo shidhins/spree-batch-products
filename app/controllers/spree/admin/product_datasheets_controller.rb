@@ -23,7 +23,7 @@ class Spree::Admin::ProductDatasheetsController < Spree::Admin::BaseController
     @product_datasheet.deleted_at = Time.now
     
     if @product_datasheet.save
-      flash.notice = I18n.t("notice_messages.product_datasheet_deleted")
+      flash.notice = Spree.t("notice_messages.product_datasheet_deleted")
     else
       @product_datasheet.errors.add_to_base('Failed to delete the product datasheet')
     end
@@ -43,7 +43,7 @@ class Spree::Admin::ProductDatasheetsController < Spree::Admin::BaseController
       else
         @product_datasheet.perform
       end
-      flash.notice = I18n.t("notice_messages.product_datasheet_saved")
+      flash.notice = Spree.t("notice_messages.product_datasheet_saved")
       redirect_to admin_product_datasheets_path
     else
       flash[:error] = "Failed to create the product datasheet"
