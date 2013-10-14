@@ -1,15 +1,10 @@
-class Spree::Admin::ProductDatasheetsController < Spree::Admin::BaseController
+class Spree::Admin::ProductDatasheetsController < Spree::Admin::ResourceController
   def index
     @product_datasheets = Spree::ProductDatasheet.
                               not_deleted.
                               order('id DESC').
                               page(params[:page] || 1).
                               per(params[:per_page] || 30)
-  end
-  
-  def new
-    @product_datasheet = Spree::ProductDatasheet.new
-    render :layout => false
   end
   
   def upload
@@ -35,7 +30,7 @@ class Spree::Admin::ProductDatasheetsController < Spree::Admin::BaseController
   
   def create
     @product_datasheet = Spree::ProductDatasheet.new(params[:product_datasheet])
-    @product_datasheet.user = current_user
+    @product_datasheet.user = spree_current_user
     
     if @product_datasheet.save && @product_datasheet.xls.original_filename =~ /\.(xlsx?|ods)$/
       if defined? Delayed::Job

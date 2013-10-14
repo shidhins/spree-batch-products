@@ -30,7 +30,7 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   # Iterates row-by-row to populate a hash of { :attribute => :value } pairs, uses this hash to create or update records accordingly
   ####################
   def perform
-    workbook =SpreadsheetDocument.load xls
+    workbook = SpreadsheetDocument.load xls
     columns_range = workbook.first_column..workbook.last_column
     header_row = workbook.row(workbook.first_row)
     

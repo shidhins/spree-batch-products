@@ -1,6 +1,8 @@
 en:
   spree:
-    batch_updates: "Batch Updates"
+    admin:
+      tab:
+        batch_updates: "Batch Updates"
     product_datasheets: "Product Datasheets"
     new_product_datasheet: "New Product Datasheet"
     datasheet_name: "Datasheet Name"
