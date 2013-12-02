@@ -2,8 +2,9 @@ namespace :spree_batch_products do
   task :create_backup, [:fields_for_backup] => :environment do |task, args|
     require 'simple_xlsx'
     
+    filename = "pricing-backup-#{Time.now.strftime('%m-%d-%Y')}.xlsx"
     puts "\n" * 2
-    puts "Preparing to dump pricing_backups.xls into #{Rails.root}"
+    puts "Preparing to dump #{filename} into #{Rails.root}"
     puts "\n" *2
     
     cr = "\r" # move cursor to beginning of line
@@ -24,12 +25,12 @@ namespace :spree_batch_products do
       headings = Spree::Product::FIELDS_FOR_BACKUP
     end
     
-    serializer = SimpleXlsx::Serializer.new("#{Rails.root}/pricing_backups.xlsx") do |doc|
+    serializer = SimpleXlsx::Serializer.new("#{Rails.root}/#{filename}") do |doc|
       doc.add_sheet("Pricing backup, generated #{Time.now.strftime("on %m/%d/%Y at %I:%M%p")}") do |sheet|
       
         sheet.add_row headings
       
-        Spree::Product.for_backup.find_in_batches(:batch_size => 100) do |products|
+        Spree::Product.for_backup.find_in_batches(:batch_size => 50) do |products|
           
           products.each do |product|
             counter +=1
