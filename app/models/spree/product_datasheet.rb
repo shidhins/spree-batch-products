@@ -142,9 +142,11 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   
   def update_products(products, attr_hash)
     products.each do |product|
-      if product.update_attributes attr_hash
-        @records_updated +=1
-      else
+      begin
+        if product.update_attributes! attr_hash
+          @records_updated += 1
+        end
+      rescue ActiveRecord::RecordNotSaved, ActiveRecord::RecordNotUnique
         @records_failed += 1
         self.product_errors += product.errors.to_a.map{|e| "Product #{product.sku}: #{e.downcase}"}.uniq
       end
