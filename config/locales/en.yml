@@ -15,6 +15,6 @@ en:
     upload_a_product_datasheet: "Upload a Product Datasheet"
     notice_messages:
       product_datasheet_saved: "Product Datasheet Saved"
-    user: "Uploaded by"
+    uploaded_by_user: "Uploaded by"
     see_errors: "See Errors"
     list_of_errors_in: "List of errors in %{file_name}"
