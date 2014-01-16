@@ -30,7 +30,7 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   # Iterates row-by-row to populate a hash of { :attribute => :value } pairs, uses this hash to create or update records accordingly
   ####################
   def perform
-    workbook =SpreadsheetDocument.load xls
+    workbook = SpreadsheetDocument.load xls
     columns_range = workbook.first_column..workbook.last_column
     header_row = workbook.row(workbook.first_row)
     
@@ -109,17 +109,16 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   def before_batch_loop
     self.touched_product_ids = []
 
-    Spree::Product.instance_methods.include?(:solr_save) and
-      Spree::Product.skip_callback(:save, :after, :solr_save)
+    Spree::Product.instance_methods.include?(:solr_index) and
+      Spree::Product.skip_callback(:save, :after, :solr_index)
   end
   
   def after_batch_loop
-    Spree::Product.instance_methods.include?(:solr_save) and
-      Spree::Product.set_callback(:save, :after, :solr_save)
+    Spree::Product.instance_methods.include?(:solr_index) and
+      Spree::Product.set_callback(:save, :after, :solr_index)
   end
   
   def after_processing
-    Spree::Product.solr_optimize if Spree::Product.respond_to? :solr_optimize
   end
   
   def create_product(attr_hash)

@@ -1,7 +1,7 @@
 require 'roo'
 class SpreadsheetDocument
   def self.load xls
-    file_name = xls.url
+    file_name = xls.url(:default, timestamp: false)
     case file_name.split('.').last
       when 'xls'
         Roo::Excel.new file_name
