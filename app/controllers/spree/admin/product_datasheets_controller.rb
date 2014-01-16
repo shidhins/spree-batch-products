@@ -33,8 +33,8 @@ class Spree::Admin::ProductDatasheetsController < Spree::Admin::ResourceControll
     @product_datasheet.user = spree_current_user
     
     if @product_datasheet.save && @product_datasheet.xls.original_filename =~ /\.(xlsx?|ods)$/
-      if defined? Delayed::Job
-        Delayed::Job.enqueue(@product_datasheet, -5)
+      if defined? Delayed::Job or defined? Sidekiq
+        @product_datasheet.delay.perform
       else
         @product_datasheet.perform
       end
