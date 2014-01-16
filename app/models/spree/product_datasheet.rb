@@ -30,7 +30,8 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   # Iterates row-by-row to populate a hash of { :attribute => :value } pairs, uses this hash to create or update records accordingly
   ####################
   def perform
-    file_name = xls.url.starts_with?('http') ? xls.url : File.join(Rails.root, 'public', xls.url)
+    file_url = xls.url(:default, timestamp: false)
+    file_name = file_url.starts_with?('http') ? file_url : File.join(Rails.root, 'public', file_url)
     workbook = SpreadsheetDocument.new(file_name, 0)
     columns_range = workbook.first_column..workbook.last_column
     header_row = workbook.row(workbook.first_row)
@@ -110,17 +111,16 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   def before_batch_loop
     self.touched_product_ids = []
 
-    Spree::Product.instance_methods.include?(:solr_save) and
-      Spree::Product.skip_callback(:save, :after, :solr_save)
+    Spree::Product.instance_methods.include?(:solr_index) and
+      Spree::Product.skip_callback(:save, :after, :solr_index)
   end
   
   def after_batch_loop
-    Spree::Product.instance_methods.include?(:solr_save) and
-      Spree::Product.set_callback(:save, :after, :solr_save)
+    Spree::Product.instance_methods.include?(:solr_index) and
+      Spree::Product.set_callback(:save, :after, :solr_index)
   end
   
   def after_processing
-    Spree::Product.solr_optimize if Spree::Product.respond_to? :solr_optimize
   end
   
   def create_product(attr_hash)
