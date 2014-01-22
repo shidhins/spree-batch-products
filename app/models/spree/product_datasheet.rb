@@ -3,7 +3,6 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   
   attr_accessor :queries_failed, :records_failed, :records_matched, :records_updated, :touched_product_ids
   alias_method :products_touched, :touched_product_ids
-  attr_accessible :xls_file_name, :xls, :deleted_at
   serialize :product_errors
   
   after_initialize do
@@ -20,8 +19,8 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   validates_attachment_presence :xls
   validates_attachment_content_type :xls, :content_type => ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.oasis.opendocument.spreadsheet', 'text/plain']
   
-  scope :not_deleted, where("spree_product_datasheets.deleted_at is NULL")
-  scope :deleted, where("spree_product_datasheets.deleted_at is NOT NULL")
+  scope :not_deleted, -> { where("spree_product_datasheets.deleted_at is NULL") }
+  scope :deleted, -> { where("spree_product_datasheets.deleted_at is NOT NULL") }
   
   ####################
   # Main logic of extension
