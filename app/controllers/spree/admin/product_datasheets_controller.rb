@@ -29,7 +29,7 @@ class Spree::Admin::ProductDatasheetsController < Spree::Admin::ResourceControll
   end
   
   def create
-    @product_datasheet = Spree::ProductDatasheet.new(params[:product_datasheet])
+    @product_datasheet = Spree::ProductDatasheet.new(permitted_resource_params)
     @product_datasheet.user = spree_current_user
     
     if @product_datasheet.save && @product_datasheet.xls.original_filename =~ /\.(xlsx?|ods)$/
