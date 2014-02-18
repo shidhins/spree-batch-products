@@ -147,7 +147,7 @@ class Spree::ProductDatasheet < ActiveRecord::Base
         if product.update_attributes! attr_hash
           @records_updated += 1
         end
-      rescue ActiveRecord::RecordNotSaved, ActiveRecord::RecordNotUnique
+      rescue ActiveRecord
         @records_failed += 1
         self.product_errors += product.errors.to_a.map{|e| "Product #{product.sku}: #{e.downcase}"}.uniq
       end
