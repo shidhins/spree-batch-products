@@ -154,7 +154,7 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   end
   
   def find_products_by_variant key, value
-    products = Spree::Variant.includes(:product).where(key => value).map(&:product)
+    products = Spree::Variant.includes(:product).where(key => value).map(&:product).compact
     @records_matched += products.size
     @queries_failed += 1 if products.size == 0
     
