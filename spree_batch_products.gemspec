@@ -18,13 +18,12 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'spree_core', '~> 2.1'
   s.add_dependency 'roo', '~> 1.10.3'
-  s.add_dependency 'simple_xlsx_writer', '~> 0.5.3'
   s.add_dependency 'rubyzip', '0.9.9'
   s.add_dependency 'batch_factory'
 
   s.add_development_dependency 'factory_girl'
   s.add_development_dependency 'ffaker'
-  s.add_development_dependency 'rspec-rails',  '~> 2.9'
+  s.add_development_dependency 'rspec-rails',  '~> 2.11.0'
   s.add_development_dependency 'sqlite3'
   
 end

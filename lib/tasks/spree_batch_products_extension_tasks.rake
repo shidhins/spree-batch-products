@@ -1,8 +1,8 @@
 namespace :spree_batch_products do
   task :create_backup, [:fields_for_backup] => :environment do |task, args|
-    require 'simple_xlsx'
-    
-    filename = "pricing-backup-#{Time.now.strftime('%m-%d-%Y')}.xlsx"
+    require 'csv'
+
+    filename = "pricing-backup-#{Time.now.strftime('%m-%d-%Y')}.csv"
     puts "\n" * 2
     puts "Preparing to dump #{filename} into #{Rails.root}"
     puts "\n" *2
@@ -24,30 +24,26 @@ namespace :spree_batch_products do
     else
       headings = Spree::Product::FIELDS_FOR_BACKUP
     end
+
+    CSV.open("#{Rails.root}/#{filename}", "w") do |csv|
+      csv << headings
     
-    serializer = SimpleXlsx::Serializer.new("#{Rails.root}/#{filename}") do |doc|
-      doc.add_sheet("Pricing backup, generated #{Time.now.strftime("on %m/%d/%Y at %I:%M%p")}") do |sheet|
-      
-        sheet.add_row headings
-      
-        Spree::Product.for_backup.find_in_batches(:batch_size => 50) do |products|
+      Spree::Product.for_backup.find_in_batches(:batch_size => 50) do |products|
+
+        products.each do |product|
+          counter += 1
           
-          products.each do |product|
-            counter +=1
-            
-            values = headings.map do |attr|
-              product.send(attr).to_s
-            end
-            
-            sheet.add_row values
-            
-            percentage = (counter/total).round(2)
-            print "#{reset}#{percentage}%"
-            $stdout.flush
-            sleep 0 # yield to OS and other processes, important for production
+          values = headings.map do |attr|
+            product.send(attr).to_s
           end
+          
+          csv << values
+          
+          percentage = (counter/total).round(2)
+          print "#{reset}#{percentage}%"
+          $stdout.flush
+          sleep 0 # yield to OS and other processes, important for production
         end
-        
       end
     end
     
