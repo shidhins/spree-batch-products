@@ -4,7 +4,7 @@ describe Spree::Admin::ProductDatasheetsController do
   render_views
   
   before do
-    controller.stub :spree_current_user => Factory(:admin_user)
+    controller.stub :spree_current_user => FactoryGirl.create(:admin_user)
   end
   
   describe "on :index" do

@@ -29,12 +29,6 @@ describe Spree::ProductDatasheet do
       @product_datasheet = Spree::ProductDatasheet.new
     end
     
-    it 'should return the absolute path where it is located on #path call' do
-      product_datasheet = Spree::ProductDatasheet.new(:xls_file_name => 'does_not_exist.xls')
-      product_datasheet.id = 123456
-      product_datasheet.path.should == "#{Rails.root}/uploads/product_datasheets/123456/does_not_exist.xls"
-    end
-    
     it 'should update its statistic attributes :before_save' do
       product_datasheet = Spree::ProductDatasheet.new(:xls_file_name => 'does_not_exist.xls')
       product_datasheet.save
@@ -71,9 +65,9 @@ describe Spree::ProductDatasheet do
     end
     
     context 'creating new Products' do
-    
       it 'should create a new Product when using a valid attr_hash' do
-        attr_hash = {:name => 'test_product_name', :permalink => 'test-product-permalink', :price => 902.10}
+        @shipping_category = FactoryGirl.create(:shipping_category)
+        attr_hash = {:name => 'test_product_name', :permalink => 'test-product-permalink', :price => 902.10, :shipping_category_id => @shipping_category.id}
         @product_datasheet.create_product(attr_hash)
         @product_datasheet.queries_failed.should == 0
       end
@@ -88,7 +82,7 @@ describe Spree::ProductDatasheet do
     context 'creating new Variants' do
       
       it 'should create a new Variant when using a valid attr_hash' do
-        product = Spree::Product.create({:name => 'test_product_name', :permalink => 'test-product-permalink', :price => 902.10})
+        product = FactoryGirl.create(:product, {:name => 'test_product_name', :permalink => 'test-product-permalink', :price => 902.10})
         attr_hash = {:product_id => product.id}
         @product_datasheet.create_variant(attr_hash)
         @product_datasheet.queries_failed.should == 0
@@ -103,7 +97,7 @@ describe Spree::ProductDatasheet do
     
     context 'updating Products' do
       before(:each) do
-        @product = Spree::Product.create({:name => 'test_product_name', :permalink => 'test-product-permalink', :price => 902.10})
+        @product = FactoryGirl.create(:product, {:name => 'test_product_name', :permalink => 'test-product-permalink', :price => 902.10})
         @key = 'permalink'
         @value = 'test-product-permalink'
       end
@@ -139,8 +133,7 @@ describe Spree::ProductDatasheet do
     
     context 'updating Variants' do
       before(:each) do
-        @product = Spree::Product.new({:name => 'test_product_name', :permalink => 'test-product-permalink', :sku => 'testvariantsku', :price => 902.10})
-        @product.save
+        @product = FactoryGirl.create(:product, {:name => 'test_product_name', :permalink => 'test-product-permalink', :sku => 'testvariantsku', :price => 902.10})
         @variant = @product.master
 
         @key = 'sku'
