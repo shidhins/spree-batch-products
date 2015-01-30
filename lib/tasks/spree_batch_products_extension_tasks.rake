@@ -25,7 +25,7 @@ namespace :spree_batch_products do
       headings = Spree::Product::FIELDS_FOR_BACKUP
     end
 
-    CSV.open("#{Rails.root}/#{filename}", "w") do |csv|
+    CSV.open("#{Rails.root}/#{filename}", "w", {force_quotes: true}) do |csv|
       csv << headings
 
       Spree::Product.for_backup.find_in_batches(:batch_size => 50) do |products|
