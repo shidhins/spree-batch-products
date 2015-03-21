@@ -67,7 +67,7 @@ describe Spree::ProductDatasheet do
     context 'creating new Products' do
       it 'should create a new Product when using a valid attr_hash' do
         @shipping_category = FactoryGirl.create(:shipping_category)
-        attr_hash = {:name => 'test_product_name', :permalink => 'test-product-permalink', :price => 902.10, :shipping_category_id => @shipping_category.id}
+        attr_hash = {:name => 'test_product_name', :slug => 'test-product-permalink', :price => 902.10, :shipping_category_id => @shipping_category.id}
         @product_datasheet.create_product(attr_hash)
         @product_datasheet.queries_failed.should == 0
       end
@@ -82,7 +82,7 @@ describe Spree::ProductDatasheet do
     context 'creating new Variants' do
       
       it 'should create a new Variant when using a valid attr_hash' do
-        product = FactoryGirl.create(:product, {:name => 'test_product_name', :permalink => 'test-product-permalink', :price => 902.10})
+        product = FactoryGirl.create(:product, {:name => 'test_product_name', :slug => 'test-product-permalink', :price => 902.10})
         attr_hash = {:product_id => product.id}
         @product_datasheet.create_variant(attr_hash)
         @product_datasheet.queries_failed.should == 0
@@ -97,8 +97,8 @@ describe Spree::ProductDatasheet do
     
     context 'updating Products' do
       before(:each) do
-        @product = FactoryGirl.create(:product, {:name => 'test_product_name', :permalink => 'test-product-permalink', :price => 902.10})
-        @key = 'permalink'
+        @product = FactoryGirl.create(:product, {:name => 'test_product_name', :slug => 'test-product-permalink', :price => 902.10})
+        @key = 'slug'
         @value = 'test-product-permalink'
       end
       
@@ -125,7 +125,7 @@ describe Spree::ProductDatasheet do
       end
       
       it 'should increment @records_failed when the Product fails to save' do
-        attr_hash = {:permalink => nil}
+        attr_hash = {:slug => ''}
         @product_datasheet.update_products(products, attr_hash)
         @product_datasheet.records_failed.should == 1
       end
@@ -133,7 +133,7 @@ describe Spree::ProductDatasheet do
     
     context 'updating Variants' do
       before(:each) do
-        @product = FactoryGirl.create(:product, {:name => 'test_product_name', :permalink => 'test-product-permalink', :sku => 'testvariantsku', :price => 902.10})
+        @product = FactoryGirl.create(:product, {:name => 'test_product_name', :slug => 'test-product-permalink', :sku => 'testvariantsku', :price => 902.10})
         @variant = @product.master
 
         @key = 'sku'

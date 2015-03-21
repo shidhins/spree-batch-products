@@ -77,7 +77,7 @@ class ProductDatasheetTest < ActiveSupport::TestCase
     context 'creating new Products' do
     
       should 'create a new Product when using a valid attr_hash' do
-        attr_hash = {:name => 'test_product_name', :permalink => 'test-product-permalink', :price => 902.10}
+        attr_hash = {:name => 'test_product_name', :slug => 'test-product-permalink', :price => 902.10}
         @product_datasheet.create_product(attr_hash)
         assert_equal 0, @product_datasheet.queries_failed
       end
@@ -92,7 +92,7 @@ class ProductDatasheetTest < ActiveSupport::TestCase
     context 'creating new Variants' do
       
       should 'create a new Variant when using a valid attr_hash' do
-        product = Product.new({:name => 'test_product_name', :permalink => 'test-product-permalink', :price => 902.10})
+        product = Product.new({:name => 'test_product_name', :slug => 'test-product-permalink', :price => 902.10})
         product.save
         attr_hash = {:product_id => product.id}
         @product_datasheet.create_variant(attr_hash)
@@ -108,9 +108,9 @@ class ProductDatasheetTest < ActiveSupport::TestCase
     
     context 'updating Products' do
       setup do
-        @product = Product.new({:name => 'test_product_name', :permalink => 'test-product-permalink', :price => 902.10})
+        @product = Product.new({:name => 'test_product_name', :slug => 'test-product-permalink', :price => 902.10})
         @product.save
-        @key = 'permalink'
+        @key = 'slug'
         @value = 'test-product-permalink'
       end
       
@@ -135,7 +135,7 @@ class ProductDatasheetTest < ActiveSupport::TestCase
       end
       
       should 'increment @records_failed when the Product fails to save' do
-        attr_hash = {:permalink => nil}
+        attr_hash = {:slug => nil}
         @product_datasheet.update_products(@key, @value, attr_hash)
         assert_equal 1, @product_datasheet.records_failed
       end
@@ -143,7 +143,7 @@ class ProductDatasheetTest < ActiveSupport::TestCase
     
     context 'updating Variants' do
       setup do
-        product = Product.new({:name => 'test_product_name', :permalink => 'test-product-permalink', :price => 902.10})
+        product = Product.new({:name => 'test_product_name', :slug => 'test-product-permalink', :price => 902.10})
         product.save
         @variant = Variant.new({:product_id => product.id, :sku => 'testvariantsku'})
         @variant.save

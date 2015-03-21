@@ -60,7 +60,7 @@ If a query returns no records, or if the search attribute does not belong to Var
 Record Creation
 ---------------
 
-To create Product records through a ProductDatasheet the first row must define `:id` as the search attribute.  Any row that you want a record created for should have an empty value for the `:id` column; otherwise, Product records will be located by the value supplied.  Record creation succeeds so long as the `:name`, `:permalink`, and `:price` attributes on each row are defined.
+To create Product records through a ProductDatasheet the first row must define `:id` as the search attribute.  Any row that you want a record created for should have an empty value for the `:id` column; otherwise, Product records will be located by the value supplied.  Record creation succeeds so long as the `:name`, `:slug`, and `:price` attributes on each row are defined.
 
 To create Variant records, follow the same style as creating a Product.  Define `:id` as the search attribute, leave the value cell of the `:id` column empty to create a record for that row, and ensure that you supply values for `:price` and `:product_id`.  This will create Variant records and save them.  The use-case for this is very limited since the distinguishing feature of Variant records are OptionTypes and OptionValues.  For simplicity, those details are left to be done programatically because of the complexity that record linking introduces.
 
