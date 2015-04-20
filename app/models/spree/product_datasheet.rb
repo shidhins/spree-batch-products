@@ -17,7 +17,7 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   has_attached_file :xls, :url => "/uploads/product_datasheets/:id/:filename"
   
   validates_attachment_presence :xls
-  validates_attachment_content_type :xls, :content_type => ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.oasis.opendocument.spreadsheet', 'text/plain']
+  validates_attachment_content_type :xls, :content_type => ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.oasis.opendocument.spreadsheet', 'text/plain', 'text/csv']
   
   scope :not_deleted, -> { where("spree_product_datasheets.deleted_at is NULL") }
   scope :deleted, -> { where("spree_product_datasheets.deleted_at is NOT NULL") }
@@ -29,6 +29,7 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   # Iterates row-by-row to populate a hash of { :attribute => :value } pairs, uses this hash to create or update records accordingly
   ####################
   def perform
+    require 'batch_factory'
     file_url = xls.url(:default, timestamp: false)
     file_name = file_url.starts_with?('http') ? file_url : File.join(Rails.root, 'public', file_url)
     workbook = SpreadsheetDocument.new(file_name, 0)
