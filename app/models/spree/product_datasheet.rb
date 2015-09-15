@@ -31,7 +31,7 @@ class Spree::ProductDatasheet < ActiveRecord::Base
   def perform
     file_url = xls.url(:default, timestamp: false)
     file_name = file_url.starts_with?('http') ? file_url : File.join(Rails.root, 'public', file_url)
-    workbook = SpreadsheetDocument.new(file_name, 0)
+    workbook = SpreadsheetDocument.new file_name
     columns_range = workbook.first_column..workbook.last_column
     header_row = workbook.row(workbook.first_row)
 
