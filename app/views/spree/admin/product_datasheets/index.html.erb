@@ -4,10 +4,23 @@
 
 <% content_for :page_actions do %>
   <span>
-    <%= button_link_to Spree.t(:upload_product_datasheet), spree.new_admin_product_datasheet_path, 
-        { :remote => true, :icon => 'icon-plus', 'data-update' => 'new_product_datasheet', 
+    <%= button_link_to Spree.t(:upload_product_datasheet), spree.new_admin_product_datasheet_path,
+        { :remote => true, :icon => 'icon-plus', 'data-update' => 'new_product_datasheet',
           :id => 'new_product_datasheet_link' } %>
   </span>
+  <div class="btn-group pull-right">
+    <button type="button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false">
+      Download <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" role="menu">
+      <li>
+        <a href="/admin/product_datasheets/download?type=products" data-remote="true">Products</a>
+      </li>
+      <li>
+        <a href="/admin/product_datasheets/download?type=variants" data-remote="true">Variants</a>
+      </li>
+    </ul>
+  </div>
 <% end %>
 
 <div id="new_product_datasheet"></div>
@@ -60,3 +73,4 @@
     <%= Spree.t(:no_resource_found, resource: plural_resource_name(Spree::ProductDatasheet)) %>
   </div>
 <% end %>
+<iframe id="hidden-frame" style="display:none;">
